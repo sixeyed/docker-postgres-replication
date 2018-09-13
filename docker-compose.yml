@@ -1,32 +1,38 @@
-
-version: '2'
+version: '3'
 
 services:
   pg-master:
-    build: '.'
-    image: 'danieldent/postgres-replication'
-    restart: 'always'
+    build: .
+    image: sixeyed/ps-storage-postgres
     environment:
       POSTGRES_USER: 'postgres'
       POSTGRES_PASSWORD: 'postgres'
       PGDATA: '/var/lib/postgresql/data/pgdata'
     volumes:
-     - '/var/lib/postgresql/data'
-    expose:
-     - '5432'
+     - pg-master:/var/lib/postgresql/data
+    ports:
+     - '5432:5432'
+    networks:
+     - pg-net
 
   pg-slave:
-    build: '.'
-    image: 'danieldent/postgres-replication'
-    restart: 'always'
+    build: .
+    image: sixeyed/ps-storage-postgres
     environment:
       POSTGRES_USER: 'postgres'
       POSTGRES_PASSWORD: 'postgres'
       PGDATA: '/var/lib/postgresql/data/pgdata'
       REPLICATE_FROM: 'pg-master'
     volumes:
-     - '/var/lib/postgresql/data'
-    expose:
-     - '5432'
-    links:
-     - 'pg-master'
+     - pg-slave:/var/lib/postgresql/data
+    ports:
+     - '5433:5432'
+    networks:
+     - pg-net
+
+networks:
+  pg-net:
+
+volumes:
+  pg-master:
+  pg-slave:
